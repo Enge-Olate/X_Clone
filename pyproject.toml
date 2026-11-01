@@ -1,0 +1,36 @@
+[project]
+name = "x-clone"
+version = "0.1.0"
+description = "Clone da rede social X."
+authors = [
+    {name = "Enge-Olate",email = "marcioalexisolate@live.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django (>=6.1.2,<7.0.0)",
+    "djangorestframework (>=3.18.3,<4.0.0)",
+    "psycopg (>=3.3.6,<4.0.0)",
+    "pillow (>=13.0.0,<14.0.0)",
+    "django-allauth (>=65.21.1,<66.0.0)",
+    "python-decouple (>=3.8,<4.0)",
+    "gunicorn (>=26.2.0,<27.0.0)",
+    "whitenoise (>=6.12.0,<7.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.2.0,<10.0.0)",
+    "pytest-django (>=4.14.0,<5.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "factory-boy (>=3.3.3,<4.0.0)",
+    "faker (>=40.44.0,<41.0.0)",
+    "ruff (>=0.17.3,<0.18.0)",
+    "mypy (>=2.4.1,<3.0.0)",
+    "pre-commit (>=4.7.0,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
