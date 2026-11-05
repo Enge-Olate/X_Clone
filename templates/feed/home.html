@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<header class="sticky top-0 z-10 bg-canvas/80 backdrop-blur-md border-b border-border">
+  <div class="flex items-center justify-between px-4 h-[53px]">
+    <h1 class="text-xl font-bold">Página inicial</h1>
+  </div>
+</header>
+
+{# Composer → POST /posts/ (HTMX) → retorna post_card.html, inserido no topo #}
+<div class="border-b border-border p-4">
+  <form hx-post="{% url 'post-list' %}"
+        hx-target="#feed-container"
+        hx-swap="afterbegin"
+        hx-on::after-request="if(event.detail.successful) this.reset()">
+    {% csrf_token %}
+    <div class="flex gap-3">
+      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shrink-0"></div>
+      <div class="flex-1">
+        <textarea name="content" maxlength="280" required
+                  placeholder="O que está acontecendo?"
+                  class="w-full bg-transparent text-lg placeholder:text-ink-muted resize-none outline-none min-h-[60px]"></textarea>
+        <div class="flex justify-end mt-2">
+          <button type="submit"
+                  class="bg-x-blue hover:bg-blue-500 text-white font-bold text-[15px] px-4 h-9 rounded-full">
+            Postar
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="feed-container" class="divide-y divide-border">
+  {% for post in posts %}
+    {% include 'partials/post_card.html' with post=post %}
+  {% empty %}
+    <p class="p-6 text-center text-ink-muted">Siga alguém para ver posts aqui.</p>
+  {% endfor %}
+</div>
+{% endblock %}

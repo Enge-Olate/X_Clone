@@ -4,13 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <title>{% block title%}X_Clone{% end block%}</title>
+    <title>{% block title%}X_Clone{% endblock%}</title>
 </head>
-<body>
-{% block content %}
-    
-{% endblock %}
+<body class="bg-canvas text-ink font-x min-h-screen"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="mx-auto flex max-w-[1265px]">
+    {% include 'partials/sidebar_left.html' %}
+    <main class="w-full max-w-[600px] border-x border-border min-h-screen">
+      {% block content %}{% endblock %}
+    </main>
+    {% include 'partials/sidebar_right.html' %}
+  </div>
 </body>
-</html>
+
