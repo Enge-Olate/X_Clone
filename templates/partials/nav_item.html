@@ -1,6 +1,11 @@
 {# templates/partials/nav_item.html #}
-<a href="{% url url_name %}"
-   class="flex items-center gap-4 p-3 rounded-full hover:bg-surface-elevated transition w-fit max-w-full">
+{% if username %}
+  <a href="{% url url_name username=username %}"
+     class="flex items-center gap-4 p-3 rounded-full hover:bg-surface-elevated transition w-fit max-w-full">
+{% else %}
+  <a href="{% url url_name %}"
+     class="flex items-center gap-4 p-3 rounded-full hover:bg-surface-elevated transition w-fit max-w-full">
+{% endif %}
   <span class="w-6 h-6 shrink-0 text-ink">
     {% if icon == 'home' %}
       <svg viewBox="0 0 24 24" class="fill-current"><path d="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913h6.638c.511 0 .929-.41.929-.913v-7.075h3.008v7.075c0 .502.418.913.929.913h6.639c.51 0 .928-.41.928-.913V7.904c0-.301-.158-.584-.408-.758z"/></svg>

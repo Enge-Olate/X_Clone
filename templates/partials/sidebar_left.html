@@ -14,11 +14,23 @@
 
     {# Navegação #}
     <nav class="mt-2 flex flex-col gap-1 items-center xl:items-stretch">
-      {% include 'partials/nav_item.html' with url_name='feed-list' label='Página inicial' icon='home' active=current == 'feed-list' %}
+      {% if current == 'feed-list' %}
+        {% include 'partials/nav_item.html' with url_name='feed-list' label='Página inicial' icon='home' active=True %}
+      {% else %}
+        {% include 'partials/nav_item.html' with url_name='feed-list' label='Página inicial' icon='home' active=False %}
+      {% endif %}
       {% include 'partials/nav_item.html' with url_name='feed-list' label='Explorar' icon='explore' active=False %}
       {% include 'partials/nav_item.html' with url_name='feed-list' label='Notificações' icon='notifications' active=False %}
       {% include 'partials/nav_item.html' with url_name='feed-list' label='Mensagens' icon='messages' active=False %}
-      {% include 'partials/nav_item.html' with url_name='profile-detail' label='Perfil' icon='profile' active=current == 'profile-detail' %}
+      {% if request.user.is_authenticated %}
+        {% if current == 'profile-detail' %}
+          {% include 'partials/nav_item.html' with url_name='profile-detail' username=request.user.username label='Perfil' icon='profile' active=True %}
+        {% else %}
+          {% include 'partials/nav_item.html' with url_name='profile-detail' username=request.user.username label='Perfil' icon='profile' active=False %}
+        {% endif %}
+      {% else %}
+        {% include 'partials/nav_item.html' with url_name='auth-login' label='Entrar' icon='profile' active=False %}
+      {% endif %}
       {# ↑ Perfil precisa de username — vamos resolver abaixo #}
     </nav>
 
@@ -39,79 +51,83 @@
 
   </div>
 
-  {# Card do usuário logado + dropdown de logout #}
-  <details class="relative mb-3">
-    <summary class="flex items-center gap-3 p-3 rounded-full hover:bg-surface-elevated cursor-pointer list-none">
-      {# Avatar #}
-      {% if request.user.profile.avatar %}
-        <img src="{{ request.user.profile.avatar.url }}"
-             alt="{{ request.user.username }}"
-             class="w-10 h-10 rounded-full object-cover shrink-0" />
-      {% else %}
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shrink-0"></div>
-      {% endif %}
+  {% if request.user.is_authenticated %}
+    {# Card do usuário logado + dropdown de logout #}
+    <details class="relative mb-3">
+      <summary class="flex items-center gap-3 p-3 rounded-full hover:bg-surface-elevated cursor-pointer list-none">
+        {# Avatar #}
+        {% if request.user.profile.avatar %}
+          <img src="{{ request.user.profile.avatar.url }}"
+               alt="{{ request.user.username }}"
+               class="w-10 h-10 rounded-full object-cover shrink-0" />
+        {% else %}
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shrink-0"></div>
+        {% endif %}
 
-      <div class="hidden xl:block text-left min-w-0">
-        <p class="font-bold text-[15px] leading-tight truncate">{{ request.user.username }}</p>
-        <p class="text-ink-muted text-[13px] truncate">@{{ request.user.username }}</p>
+        <div class="hidden xl:block text-left min-w-0">
+          <p class="font-bold text-[15px] leading-tight truncate">{{ request.user.username }}</p>
+          <p class="text-ink-muted text-[13px] truncate">@{{ request.user.username }}</p>
+        </div>
+
+        <svg class="hidden xl:block w-5 h-5 fill-ink ml-auto" viewBox="0 0 24 24">
+          <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+        </svg>
+      </summary>
+
+      {# Dropdown #}
+      <div class="absolute bottom-full left-0 mb-2 w-64 bg-canvas border border-border rounded-2xl shadow-xl py-2 z-50">
+        <form method="post" action="{% url 'auth-logout' %}">
+          {% csrf_token %}
+          <button type="submit"
+                  class="w-full text-left px-4 py-3 text-[15px] font-bold hover:bg-surface-elevated transition">
+            Sair @{{ request.user.username }}
+          </button>
+        </form>
       </div>
-
-      <svg class="hidden xl:block w-5 h-5 fill-ink ml-auto" viewBox="0 0 24 24">
-        <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
-      </svg>
-    </summary>
-
-    {# Dropdown #}
-    <div class="absolute bottom-full left-0 mb-2 w-64 bg-canvas border border-border rounded-2xl shadow-xl py-2 z-50">
-      <form method="post" action="{% url 'auth-logout' %}">
-        {% csrf_token %}
-        <button type="submit"
-                class="w-full text-left px-4 py-3 text-[15px] font-bold hover:bg-surface-elevated transition">
-          Sair @{{ request.user.username }}
-        </button>
-      </form>
-    </div>
-  </details>
+    </details>
+  {% endif %}
 
 </aside>
 
-{# ⬇️ Modal de post — vive aqui porque o botão "Postar" está aqui #}
-<dialog id="post-modal"
-        class="bg-transparent backdrop:bg-[#5c6e7d]/40 p-0 m-auto max-w-[600px] w-full">
-  <div class="bg-canvas rounded-2xl border border-border p-4">
-    <div class="flex items-center justify-between mb-4">
-      <button type="button"
-              onclick="document.getElementById('post-modal').close()"
-              class="p-2 rounded-full hover:bg-surface-elevated">
-        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-ink"><path d="M13.414 12l5.793-5.793c.39-.39.39-1.023 0-1.414s-1.023-.39-1.414 0L12 10.586 6.207 4.793c-.39-.39-1.023-.39-1.414 0s-.39 1.023 0 1.414L10.586 12l-5.793 5.793c-.39.39-.39 1.023 0 1.414.195.195.45.293.707.293s.512-.098.707-.293L12 13.414l5.793 5.793c.195.195.45.293.707.293s.512-.098.707-.293c.39-.39.39-1.023 0-1.414L13.414 12z"/></svg>
-      </button>
-    </div>
+{% if request.user.is_authenticated %}
+  {# ⬇️ Modal de post — vive aqui porque o botão "Postar" está aqui #}
+  <dialog id="post-modal"
+          class="bg-transparent backdrop:bg-[#5c6e7d]/40 p-0 m-auto max-w-[600px] w-full">
+    <div class="bg-canvas rounded-2xl border border-border p-4">
+      <div class="flex items-center justify-between mb-4">
+        <button type="button"
+                onclick="document.getElementById('post-modal').close()"
+                class="p-2 rounded-full hover:bg-surface-elevated">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-ink"><path d="M13.414 12l5.793-5.793c.39-.39.39-1.023 0-1.414s-1.023-.39-1.414 0L12 10.586 6.207 4.793c-.39-.39-1.023-.39-1.414 0s-.39 1.023 0 1.414L10.586 12l-5.793 5.793c-.39.39-.39 1.023 0 1.414.195.195.45.293.707.293s.512-.098.707-.293L12 13.414l5.793 5.793c.195.195.45.293.707.293s.512-.098.707-.293c.39-.39.39-1.023 0-1.414L13.414 12z"/></svg>
+        </button>
+      </div>
 
-    <form hx-post="{% url 'post-list' %}"
-          hx-swap="none"
-          hx-on::after-request="if(event.detail.successful){ document.getElementById('post-modal').close(); window.location.href='{% url 'feed-list' %}'; }">
-      {% csrf_token %}
-      <div class="flex gap-3">
-        {% if request.user.profile.avatar %}
-          <img src="{{ request.user.profile.avatar.url }}"
-               class="w-12 h-12 rounded-full object-cover shrink-0" />
-        {% else %}
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shrink-0"></div>
-        {% endif %}
-        <div class="flex-1">
-          <textarea name="content" maxlength="280" required
-                    placeholder="O que está acontecendo?"
-                    class="w-full bg-transparent text-xl placeholder:text-ink-muted resize-none outline-none min-h-[120px]"></textarea>
-          <div class="flex justify-end mt-2">
-            <button type="submit"
-                    class="bg-x-blue hover:bg-blue-500 text-white font-bold text-[15px] px-5 h-9 rounded-full">
-              Postar
-            </button>
+      <form hx-post="{% url 'post-list' %}"
+            hx-swap="none"
+            hx-on::after-request="if(event.detail.successful){ document.getElementById('post-modal').close(); window.location.href='{% url 'feed-list' %}'; }">
+        {% csrf_token %}
+        <div class="flex gap-3">
+          {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}"
+                 class="w-12 h-12 rounded-full object-cover shrink-0" />
+          {% else %}
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shrink-0"></div>
+          {% endif %}
+          <div class="flex-1">
+            <textarea name="content" maxlength="280" required
+                      placeholder="O que está acontecendo?"
+                      class="w-full bg-transparent text-xl placeholder:text-ink-muted resize-none outline-none min-h-[120px]"></textarea>
+            <div class="flex justify-end mt-2">
+              <button type="submit"
+                      class="bg-x-blue hover:bg-blue-500 text-white font-bold text-[15px] px-5 h-9 rounded-full">
+                Postar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </div>
-</dialog>
+      </form>
+    </div>
+  </dialog>
+{% endif %}
 
 {% endwith %}
